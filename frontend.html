@@ -137,21 +137,44 @@
     </div>
 
     <script>
-        document.getElementById('carForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            
-            let company = document.getElementById('company').value;
-            let model = document.getElementById('model').value;
-            let mileage = document.getElementById('mileage').value;
-            let year = document.getElementById('year').value;
+    document.getElementById('carForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
 
-            if (company && model && mileage && year) {
-                document.getElementById('result').innerHTML = `Predicting price for: ${company} ${model}, ${year}, ${mileage} km/l`;
+        let company = document.getElementById('company').value;
+        let model = document.getElementById('model').value;
+        let mileage = document.getElementById('mileage').value;
+        let year = document.getElementById('year').value;
+
+        let formData = {
+            company: company,
+            model: model,
+            mileage: mileage,
+            year: year
+        };
+
+        try {
+            let response = await fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            let result = await response.json();
+
+            if (result.predicted_price) {
+                document.getElementById('result').innerHTML = `Estimated Price: $${result.predicted_price}`;
             } else {
-                document.getElementById('result').innerHTML = "Please fill in all fields.";
+                document.getElementById('result').innerHTML = "Error in prediction!";
             }
-        });
-    </script>
+        } catch (error) {
+            console.error("Error:", error);
+            document.getElementById('result').innerHTML = "Server error!";
+        }
+    });
+</script>
+
 
 </body>
 </html>
